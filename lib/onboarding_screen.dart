@@ -10,7 +10,51 @@ class OnBoardingScreen extends StatefulWidget {
 }
 
 class _OnBoardingScreenState extends EditImageViewModel {
-  String _texts = "sample_text";
+  String selectedFont = 'Roboto';
+
+  List<Widget> pages = [
+    Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/img4.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
+    ),
+    Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/img8.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
+    ),
+    Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/img9.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
+    ),
+    Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/img7.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
+    ),
+    Container(
+      decoration: const BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage('assets/img6.jpg'),
+          fit: BoxFit.cover,
+        ),
+      ),
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -22,25 +66,19 @@ class _OnBoardingScreenState extends EditImageViewModel {
           children: [
             Stack(
               children: [
-                Container(
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/img4.jpg'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
+                PageView.builder(
+                  itemCount: pages.length,
+                  itemBuilder: (context, index) {
+                    return pages[index];
+                  },
                 ),
                 for (int i = 0; i < texts.length; i++)
                   Positioned(
                     left: texts[i].left,
                     top: texts[i].top,
                     child: GestureDetector(
-                      onLongPress: () {
-                        print('dsuyf');
-                      },
-                      onTap: () {
-                        print('hdgsi');
-                      },
+                      onLongPress: () => addDeleteDialog(context),
+                      onTap: () => setCurrentIndex(context, i),
                       child: Draggable(
                         feedback: ImageText(textInfo: texts[i]),
                         child: ImageText(textInfo: texts[i]),
@@ -74,6 +112,10 @@ class _OnBoardingScreenState extends EditImageViewModel {
                         ),
                       )
                     : const SizedBox.shrink(),
+                Container(
+                    alignment: Alignment.bottomLeft,
+                    padding: const EdgeInsets.only(left: 10, bottom: 20),
+                    child: _alterScreenFab),
               ],
             ),
           ],
@@ -81,6 +123,9 @@ class _OnBoardingScreenState extends EditImageViewModel {
       ),
     );
   }
+
+  Widget get _alterScreenFab => ElevatedButton(
+      onPressed: () => alterScreen(context), child: Text('Customize Pages'));
 
   Widget get _addnewTextFab => FloatingActionButton(
         onPressed: () => addNewDialog(context),
@@ -100,20 +145,35 @@ class _OnBoardingScreenState extends EditImageViewModel {
         child: ListView(
           scrollDirection: Axis.horizontal,
           children: [
-            IconButton(
-              icon: const Icon(
-                Icons.font_download_rounded,
-                color: Colors.black,
-              ),
-              onPressed: () {},
-              tooltip: 'Save Image',
+            DropdownButton<String>(
+              value: selectedFont,
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    texts[currentIndex].fontFamily = newValue;
+                    selectedFont = newValue;
+                  });
+                }
+              },
+              items: <String>[
+                'Roboto',
+                'Times New Roman',
+                'Courier',
+                'San Francisco Regular',
+                'San Francisco Bold',
+              ].map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
             ),
             IconButton(
               icon: const Icon(
                 Icons.add,
                 color: Colors.black,
               ),
-              onPressed: () {},
+              onPressed: increaseFontSize,
               tooltip: 'Increase font size',
             ),
             IconButton(
@@ -121,7 +181,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
                 Icons.remove,
                 color: Colors.black,
               ),
-              onPressed: () {},
+              onPressed: decreaseFontSize,
               tooltip: 'Decrease font size',
             ),
             IconButton(
@@ -129,7 +189,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
                 Icons.format_align_left,
                 color: Colors.black,
               ),
-              onPressed: () {},
+              onPressed: alignLeft,
               tooltip: 'Align left',
             ),
             IconButton(
@@ -137,7 +197,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
                 Icons.format_align_center,
                 color: Colors.black,
               ),
-              onPressed: () {},
+              onPressed: alignCenter,
               tooltip: 'Align Center',
             ),
             IconButton(
@@ -145,7 +205,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
                 Icons.format_align_right,
                 color: Colors.black,
               ),
-              onPressed: () {},
+              onPressed: alignRight,
               tooltip: 'Align Right',
             ),
             IconButton(
@@ -153,7 +213,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
                 Icons.format_bold,
                 color: Colors.black,
               ),
-              onPressed: () {},
+              onPressed: boldText,
               tooltip: 'Bold',
             ),
             IconButton(
@@ -161,7 +221,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
                 Icons.format_italic,
                 color: Colors.black,
               ),
-              onPressed: () {},
+              onPressed: italicText,
               tooltip: 'Italic',
             ),
             IconButton(
@@ -169,13 +229,13 @@ class _OnBoardingScreenState extends EditImageViewModel {
                 Icons.space_bar,
                 color: Colors.black,
               ),
-              onPressed: () {},
+              onPressed: addLinesToText,
               tooltip: 'Add New Line',
             ),
             Tooltip(
               message: 'Red',
               child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => changeTextColor(Colors.red),
                   child: const CircleAvatar(
                     backgroundColor: Colors.red,
                   )),
@@ -186,7 +246,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
             Tooltip(
               message: 'White',
               child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => changeTextColor(Colors.white),
                   child: const CircleAvatar(
                     backgroundColor: Colors.white,
                   )),
@@ -197,7 +257,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
             Tooltip(
               message: 'Black',
               child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => changeTextColor(Colors.black),
                   child: const CircleAvatar(
                     backgroundColor: Colors.black,
                   )),
@@ -208,7 +268,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
             Tooltip(
               message: 'Blue',
               child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => changeTextColor(Colors.blue),
                   child: const CircleAvatar(
                     backgroundColor: Colors.blue,
                   )),
@@ -219,7 +279,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
             Tooltip(
               message: 'Yellow',
               child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => changeTextColor(Colors.yellow),
                   child: const CircleAvatar(
                     backgroundColor: Colors.yellow,
                   )),
@@ -230,7 +290,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
             Tooltip(
               message: 'Green',
               child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => changeTextColor(Colors.green),
                   child: const CircleAvatar(
                     backgroundColor: Colors.green,
                   )),
@@ -241,7 +301,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
             Tooltip(
               message: 'Orange',
               child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => changeTextColor(Colors.orange),
                   child: const CircleAvatar(
                     backgroundColor: Colors.orange,
                   )),
@@ -252,7 +312,7 @@ class _OnBoardingScreenState extends EditImageViewModel {
             Tooltip(
               message: 'Pink',
               child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => changeTextColor(Colors.pink),
                   child: const CircleAvatar(
                     backgroundColor: Colors.pink,
                   )),
@@ -263,4 +323,66 @@ class _OnBoardingScreenState extends EditImageViewModel {
           ],
         ),
       ));
+
+  void updateMyTiles(int oldIndex, int newIndex) {
+    setState(() {
+      if (oldIndex < newIndex) {
+        newIndex--;
+      }
+
+      final tile = pages.removeAt(oldIndex);
+      pages.insert(newIndex, tile);
+    });
+  }
+
+  alterScreen(context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+          title: const Text(
+            'Drag and Arrange the Pages',
+            selectionColor: Colors.deepPurple,
+            style: TextStyle(fontFamily: 'Times New Roman', fontSize: 20),
+          ),
+          content: SizedBox(
+            height: 300,
+            width: 300,
+            child: ReorderableListView(
+              onReorder: ((oldIndex, newIndex) =>
+                  updateMyTiles(oldIndex, newIndex)),
+              children: [
+                for (final tile in pages)
+                  ListTile(
+                    key: ValueKey(tile),
+                    title: Row(
+                      children: [
+                        Icon(Icons.drag_handle),
+                        SizedBox(width: 50, height: 80),
+                        SizedBox(width: 50, height: 80, child: tile as Widget),
+                        SizedBox(width: 20, height: 80),
+                        Text('pages'),
+                        IconButton(
+                          icon: const Icon(Icons.delete),
+                          onPressed: () {},
+                        )
+                      ],
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                      side:
+                          const BorderSide(color: Color.fromARGB(71, 0, 0, 0)),
+                    ),
+                    tileColor: Colors.grey.shade300,
+                  )
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Save'),
+            )
+          ]),
+    );
+  }
 }

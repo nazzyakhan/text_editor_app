@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 class TextInfo {
+  String fontFamily;
   String text;
   double left;
   double top;
@@ -11,6 +12,7 @@ class TextInfo {
   TextAlign textAlign;
 
   TextInfo({
+    required this.fontFamily,
     required this.text,
     required this.left,
     required this.top,

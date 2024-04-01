@@ -14,11 +14,11 @@ class ImageText extends StatelessWidget {
       textInfo.text,
       textAlign: textInfo.textAlign,
       style: TextStyle(
-        fontSize: textInfo.fontSize,
-        fontWeight: textInfo.fontWeight,
-        fontStyle: textInfo.fontStyle,
-        color: textInfo.color,
-      ),
+          fontSize: textInfo.fontSize,
+          fontWeight: textInfo.fontWeight,
+          fontStyle: textInfo.fontStyle,
+          color: textInfo.color,
+          fontFamily: textInfo.fontFamily),
     );
   }
 }
