@@ -5,13 +5,16 @@ import 'package:text_editor_app/widgets/default_button.dart';
 
 abstract class EditImageViewModel extends State<OnBoardingScreen> {
   TextEditingController textEditingController = TextEditingController();
-  TextEditingController creatorText = TextEditingController();
-  int currentIndex = 0;
-  List<TextInfo> texts = [];
+  int currentTextIndex = 0;
+  int currentTextHistoryListIndex = 0;
+
+  List<List<TextInfo>> textHistoryList = [];
+
+  List<TextInfo> currTexts = [];
 
   removeText(BuildContext context) {
     setState(() {
-      texts.removeAt(currentIndex);
+      currTexts.removeAt(currentTextIndex);
       Navigator.of(context).pop();
     });
     ScaffoldMessenger.of(context).showSnackBar(
@@ -28,147 +31,166 @@ abstract class EditImageViewModel extends State<OnBoardingScreen> {
 
   setCurrentIndex(BuildContext context, int index) {
     setState(() {
-      currentIndex = index;
+      currentTextIndex = index;
     });
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         backgroundColor: Colors.blueGrey,
-        content: Text('Text selected for Styling',
-            style: TextStyle(
-              color: Colors.white,
-            )),
+        content: Text(
+          'Text selected for Styling',
+          style: TextStyle(
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
 
   String selectedFont = 'Roboto';
 
+  void updateTextHistoryList(List<TextInfo> newTextList) {
+    textHistoryList.add(newTextList);
+    currentTextHistoryListIndex = textHistoryList.length - 1;
+  }
+
   void changeFont(String newFont) {
+    print(textHistoryList);
     setState(() {
       selectedFont = newFont;
-      texts[currentIndex].fontFamily = selectedFont;
+      currTexts[currentTextIndex].fontFamily = selectedFont;
+      updateTextHistoryList(currTexts);
     });
   }
 
   changeTextColor(Color color) {
     setState(() {
-      texts[currentIndex].color = color;
+      currTexts[currentTextIndex].color = color;
+      updateTextHistoryList(currTexts);
     });
   }
 
   increaseFontSize() {
     setState(() {
-      texts[currentIndex].fontSize += 2;
+      currTexts[currentTextIndex].fontSize += 2;
+      updateTextHistoryList(currTexts);
     });
   }
 
   decreaseFontSize() {
     setState(() {
-      texts[currentIndex].fontSize -= 2;
+      currTexts[currentTextIndex].fontSize -= 2;
+      updateTextHistoryList(currTexts);
     });
   }
 
   alignLeft() {
     setState(() {
-      texts[currentIndex].textAlign = TextAlign.left;
+      currTexts[currentTextIndex].textAlign = TextAlign.left;
+      updateTextHistoryList(currTexts);
     });
   }
 
   alignCenter() {
     setState(() {
-      texts[currentIndex].textAlign = TextAlign.center;
+      currTexts[currentTextIndex].textAlign = TextAlign.center;
+      updateTextHistoryList(currTexts);
     });
   }
 
   alignRight() {
     setState(() {
-      texts[currentIndex].textAlign = TextAlign.right;
+      currTexts[currentTextIndex].textAlign = TextAlign.right;
+      updateTextHistoryList(currTexts);
     });
   }
 
   boldText() {
     setState(() {
-      if (texts[currentIndex].fontWeight == FontWeight.bold) {
-        texts[currentIndex].fontWeight = FontWeight.normal;
+      if (currTexts[currentTextIndex].fontWeight == FontWeight.bold) {
+        currTexts[currentTextIndex].fontWeight = FontWeight.normal;
       } else {
-        texts[currentIndex].fontWeight = FontWeight.bold;
+        currTexts[currentTextIndex].fontWeight = FontWeight.bold;
       }
+      updateTextHistoryList(currTexts);
     });
   }
 
   italicText() {
     setState(() {
-      if (texts[currentIndex].fontStyle == FontStyle.italic) {
-        texts[currentIndex].fontStyle = FontStyle.normal;
+      if (currTexts[currentTextIndex].fontStyle == FontStyle.italic) {
+        currTexts[currentTextIndex].fontStyle = FontStyle.normal;
       } else {
-        texts[currentIndex].fontStyle = FontStyle.italic;
+        currTexts[currentTextIndex].fontStyle = FontStyle.italic;
       }
+      updateTextHistoryList(currTexts);
     });
   }
 
   addLinesToText() {
     setState(() {
-      if (texts[currentIndex].text.contains('\n')) {
-        texts[currentIndex].text =
-            texts[currentIndex].text.replaceAll('\n', ' ');
+      if (currTexts[currentTextIndex].text.contains('\n')) {
+        currTexts[currentTextIndex].text =
+            currTexts[currentTextIndex].text.replaceAll('\n', ' ');
       } else {
-        texts[currentIndex].text =
-            texts[currentIndex].text.replaceAll(' ', '\n');
+        currTexts[currentTextIndex].text =
+            currTexts[currentTextIndex].text.replaceAll(' ', '\n');
       }
+      updateTextHistoryList(currTexts);
     });
   }
 
   addNewText(BuildContext context) {
-    setState(
-      () {
-        texts.add(
-          TextInfo(
-              text: textEditingController.text,
-              left: 0,
-              top: 0,
-              color: Colors.black,
-              fontFamily: 'Roboto',
-              fontWeight: FontWeight.normal,
-              fontStyle: FontStyle.normal,
-              fontSize: 20,
-              textAlign: TextAlign.left),
-        );
-        Navigator.of(context).pop();
-      },
-    );
+    setState(() {
+      currTexts.add(
+        TextInfo(
+            text: textEditingController.text,
+            left: 0,
+            top: 0,
+            color: Colors.black,
+            fontFamily: 'Roboto',
+            fontWeight: FontWeight.normal,
+            fontStyle: FontStyle.normal,
+            fontSize: 20,
+            textAlign: TextAlign.left),
+      );
+      updateTextHistoryList(currTexts);
+      Navigator.of(context).pop();
+    });
   }
 
   addNewDialog(context) {
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-          title: const Text(
-            'Add New Text',
-          ),
-          content: TextField(
-            controller: textEditingController,
-            maxLines: 5,
-            decoration: const InputDecoration(
-              suffixIcon: Icon(
-                Icons.edit,
-              ),
-              filled: true,
-              hintText: 'Your Text Here..',
+        title: const Text(
+          'Add New Text',
+        ),
+        content: TextField(
+          controller: textEditingController,
+          maxLines: 5,
+          decoration: const InputDecoration(
+            suffixIcon: Icon(
+              Icons.edit,
             ),
+            filled: true,
+            hintText: 'Your Text Here..',
           ),
-          actions: <Widget>[
-            DefaultButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Back'),
-              color: Colors.white,
-              textColor: Color.fromARGB(255, 243, 193, 250),
-            ),
-            DefaultButton(
-                onPressed: () => addNewText(context),
-                child: const Text('Add Text'),
-                color: Color.fromARGB(255, 205, 158, 216),
-                textColor: Color.fromARGB(255, 0, 0, 0)),
-          ]),
+        ),
+        actions: <Widget>[
+          DefaultButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Back'),
+            color: Colors.white,
+            textColor: Color.fromARGB(255, 243, 193, 250),
+          ),
+          DefaultButton(
+            onPressed: () => addNewText(context),
+            child: const Text('Add Text'),
+            color: Color.fromARGB(255, 205, 158, 216),
+            textColor: Color.fromARGB(255, 0, 0, 0),
+          ),
+        ],
+      ),
     );
   }
 
@@ -176,22 +198,24 @@ abstract class EditImageViewModel extends State<OnBoardingScreen> {
     showDialog(
       context: context,
       builder: (BuildContext context) => AlertDialog(
-          title: const Text(
-            'Do you want to delete this text?',
+        title: const Text(
+          'Do you want to delete this text?',
+        ),
+        actions: <Widget>[
+          DefaultButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Back'),
+            color: Colors.white,
+            textColor: Color.fromARGB(255, 243, 193, 250),
           ),
-          actions: <Widget>[
-            DefaultButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Back'),
-              color: Colors.white,
-              textColor: Color.fromARGB(255, 243, 193, 250),
-            ),
-            DefaultButton(
-                onPressed: () => removeText(context),
-                child: const Text('DELETE'),
-                color: Color.fromARGB(255, 205, 158, 216),
-                textColor: Color.fromARGB(255, 0, 0, 0)),
-          ]),
+          DefaultButton(
+            onPressed: () => removeText(context),
+            child: const Text('DELETE'),
+            color: Color.fromARGB(255, 205, 158, 216),
+            textColor: Color.fromARGB(255, 0, 0, 0),
+          ),
+        ],
+      ),
     );
   }
 }
